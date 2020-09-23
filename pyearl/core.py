@@ -5,6 +5,8 @@ import filetype
 from werkzeug import run_simple, Response
 
 from pyearl.exceptions import URLExistsError, EndpointExistsError
+from pyearl.route import Route
+from pyearl.utils.producer import create_session_id
 from pyearl.wsgi_app import wsgi_app
 
 
@@ -17,6 +19,7 @@ class Pyearl:
         self.host = '127.0.0.1'                 # 默认主机
         self.port = 7382                        # 默认端口
 
+        self.route = Route(self)                # 路由装饰器
         self.url_map = {}                       # URL 与 endpoint 的映射
         self.static_map = {}                    # URL 与静态资源的映射
         self.function_map = {}                  # endpoint 与 视图 函数的映射
@@ -57,6 +60,16 @@ class Pyearl:
         """
         url: str = urlparse(request.url).path
 
+        # 响应头
+        headers = {
+            'Server': 'pyearl'
+        }
+
+        # 获取cookie
+        cookies = request.cookies
+        if'session_id' not in cookies:
+            headers['Set-Cookie'] = 'session_id={}'.format(create_session_id())
+
         if url.startswith(self.static_url):
             # 静态资源
             endpoint = 'statis'
@@ -64,10 +77,6 @@ class Pyearl:
         else:
             # 非静态资源的静态路由
             endpoint = self.url_map.get(url, None)
-
-        headers = {
-            'Server': 'pyearl'
-        }
 
         if endpoint is None:
             return ERROR_MAP['404']
@@ -102,7 +111,7 @@ class Pyearl:
             """
             视图处理
             """
-            return handler_func.func(request)
+            rep =  handler_func.func(request)
         elif handler_func.func_type == 'static':
             """
             静态资源处理
@@ -115,10 +124,10 @@ class Pyearl:
             """
             return ERROR_MAP['503']
 
-        # status = 200
-        # content_type = 'text/html'
-        #
-        # return Response(rep, content_type=f'{content_type}; charset=UTF-8', headers=headers, status=status)
+        status = 200
+        content_type = 'text/html'
+
+        return Response(rep, content_type=f'{content_type}; charset=UTF-8', headers=headers, status=status)
 
     def dispatch_static(self, static_path):
         """
