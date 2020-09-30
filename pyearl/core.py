@@ -6,6 +6,7 @@ from werkzeug import run_simple, Response
 
 from pyearl.exceptions import URLExistsError, EndpointExistsError
 from pyearl.route import Route
+from pyearl.session import session
 from pyearl.utils.producer import create_session_id
 from pyearl.wsgi_app import wsgi_app
 
@@ -19,6 +20,7 @@ class Pyearl:
         self.host = '127.0.0.1'                 # 默认主机
         self.port = 7382                        # 默认端口
 
+        self.session_path = '.session'          # session 存储路径
         self.route = Route(self)                # 路由装饰器
         self.url_map = {}                       # URL 与 endpoint 的映射
         self.static_map = {}                    # URL 与静态资源的映射
@@ -124,6 +126,10 @@ class Pyearl:
             """
             return ERROR_MAP['503']
 
+        # 重定向
+        if isinstance(rep, Response):
+            return rep
+
         status = 200
         content_type = 'text/html'
 
@@ -164,6 +170,9 @@ class Pyearl:
             self.port = port
 
         self.function_map['static'] = HandlerFunc(func=self.dispatch_static, func_type='static')
+
+        session.set_storage_path(self.session_path)
+        session.load_session_storage()
 
         run_simple(hostname=self.host, port=self.port, application=self, **options)
 
