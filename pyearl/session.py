@@ -1,6 +1,7 @@
 import base64
 import json
 from pathlib import PurePath, Path
+import os.path
 
 
 class Session:
@@ -20,6 +21,8 @@ class Session:
         :return:
         """
         self.__storage_path__ = storage_path
+        if not os.path.exists(self.__storage_path__):
+            os.mkdir(self.__storage_path__)
 
     def storage(self, session_id):
         """

@@ -24,3 +24,8 @@ class URLExistsError(PyearlException):
     """
     def __init__(self, message='URL exists'):
         super().__init__(message=message)
+
+
+class TemplateSyntaxError(ValueError):
+    """Raised when a template has a syntax error."""
+    pass

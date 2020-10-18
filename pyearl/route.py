@@ -3,8 +3,6 @@ from pathlib import Path
 
 from werkzeug import Response
 
-from pyearl.core import ERROR_MAP
-
 
 class Route:
     """
@@ -80,3 +78,11 @@ def render_file(file_path, file_name=None):
         return Response(content, headers=headers, status=200)
 
     return ERROR_MAP['404']
+
+
+# 定义常见服务异常的响应体
+ERROR_MAP = {
+    '401': Response('<h1>401 Unknown or unsupported method</h1>', content_type='text/html; charset=UTF-8', status=401),
+    '404': Response('<h1>404 Source Not Found<h1>', content_type='text/html; charset=UTF-8', status=404),
+    '503': Response('<h1>503 Unknown function type</h1>', content_type='text/html; charset=UTF-8',  status=503)
+}

@@ -5,7 +5,7 @@ import filetype
 from werkzeug import run_simple, Response
 
 from pyearl.exceptions import URLExistsError, EndpointExistsError
-from pyearl.route import Route
+from pyearl.route import Route, ERROR_MAP
 from pyearl.session import session
 from pyearl.utils.producer import create_session_id
 from pyearl.wsgi_app import wsgi_app
@@ -191,14 +191,6 @@ class HandlerFunc:
         self.func = func                    # 处理函数
         self.func_type = func_type          # 函数类型
         self.options = options              # 参数选项
-
-
-# 定义常见服务异常的响应体
-ERROR_MAP = {
-    '401': Response('<h1>401 Unknown or unsupported method</h1>', content_type='text/html; charset=UTF-8', status=401),
-    '404': Response('<h1>404 Source Not Found<h1>', content_type='text/html; charset=UTF-8', status=404),
-    '503': Response('<h1>503 Unknown function type</h1>', content_type='text/html; charset=UTF-8',  status=503)
-}
 
 
 # 定义文件类型
